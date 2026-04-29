@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beneath</title>
+  <link rel="stylesheet" href="https://use.typekit.net/eub7xvs.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500&display=swap" rel="stylesheet">
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    :root {
+      --br-void:#06090f; --br-s0:#0f1a2e; --br-s1:#152236; --br-s2:#1a2744; --br-s3:#1f2e4e;
+      --br-gold:#c9a84c; --br-gold-light:#d4b86a; --br-gold-dim:#7a5f25;
+      --br-bone:#f5f4f0; --br-silver:#b0b8c1; --br-grey:#8a9099;
+      --br-border:#2e3f5c; --br-crimson:#8b1a1a;
+      --br-bedrock:#c9a84c; --br-rock:#4b7fa8; --br-sand:#9a8560; --br-mud:#6b5038; --br-fog:#4a5260;
+      --font-serif:'Playfair Display',Georgia,serif;
+      --font-sans:'Avenir Next','Avenir',-apple-system,system-ui,sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--br-s0);color:var(--br-bone);font-family:var(--font-sans);font-size:13px;line-height:1.5}
+    .wordmark{font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--br-gold)}
+    .label{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--br-gold)}
+    .header{background:var(--br-void);padding:10px 14px;border-bottom:1px solid var(--br-s2)}
+    .section{padding:14px;border-bottom:1px solid var(--br-border)}
+    .actor-card{background:var(--br-s2);padding:10px 12px;border-radius:2px;margin-bottom:8px}
+    .actor-name{font-family:var(--font-serif);font-size:14px;color:var(--br-bone)}
+    .actor-role{font-size:11px;color:var(--br-grey);margin-top:2px}
+    .grade{font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:2px 6px;border-radius:2px}
+    .grade-bedrock{color:var(--br-bedrock);background:#2a1f0a}
+    .grade-rock{color:var(--br-rock);background:#0a1830}
+    .grade-sand{color:var(--br-sand);background:#1e1a10}
+    .btn{display:inline-flex;align-items:center;padding:6px 12px;font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer}
+    .btn-primary{background:var(--br-gold);color:var(--br-void)}
+    .btn-secondary{background:transparent;color:var(--br-silver);border:1px solid var(--br-border)}
+    .btn:disabled{opacity:0.5}
+    #status{padding:14px;color:var(--br-grey);font-size:12px}
+    .divergent-badge{display:inline-block;padding:2px 8px;background:#2a1508;color:#e8895a;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-radius:2px}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="wordmark">Black Rudder · Beneath</span>
+  </div>
+  <div id="app">
+    <div id="status">Loading…</div>
+  </div>
+  <script src="taskpane.js"></script>
+</body>
+</html>
