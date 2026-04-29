@@ -128,11 +128,17 @@ class ChatController extends Controller
             'created_at' => now(),
         ]);
 
-        // Build message history from DB (last 40 messages)
+        // Build message history from DB (last 40 messages).
+        // BD-360: per-voice context — each member sees ALL user messages (shared
+        // context) but only their own assistant responses, so their persona
+        // stays consistent across a multi-voice thread. This mirrors how
+        // Claude skills maintain independent context windows.
         $history = ChatMessage::where('session_id', $session->id)
             ->orderBy('created_at')
-            ->get(['role', 'content'])
+            ->get(['role', 'content', 'voice'])
+            ->filter(fn($m) => $m->role === 'user' || $m->voice === $activeVoice)
             ->map(fn($m) => ['role' => $m->role, 'content' => $m->content])
+            ->values()
             ->toArray();
 
         // Replace the last user message content with context-prefixed version for the API call
