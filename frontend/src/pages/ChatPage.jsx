@@ -1,4 +1,4 @@
-// BD-309 — ChatPage redesign  (BD-360: multi-voice per-message)
+// BD-309 — ChatPage redesign  (BD-360/BD-361: multi-voice natural language routing)
 import { useState, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -18,10 +18,14 @@ const SQUAD_KEYWORDS = ['squad', 'everyone', 'all of you', 'the team', 'the whol
 
 // BD-361: infer routing from natural language — no syntax required.
 // Returns { mode: 'squad' } | { mode: 'voice', voiceId } | { mode: 'session' }
+// Sort by label length descending so 'Jackson' is checked before 'Jack'
+// (otherwise "jackson" would match the shorter name first).
+const VOICES_BY_LENGTH = [...VOICES].sort((a, b) => b.label.length - a.label.length)
+
 function detectRouting(content) {
   const lower = content.toLowerCase()
   if (SQUAD_KEYWORDS.some(k => lower.includes(k))) return { mode: 'squad' }
-  for (const v of VOICES) {
+  for (const v of VOICES_BY_LENGTH) {
     if (lower.includes(v.label.toLowerCase())) return { mode: 'voice', voiceId: v.id }
   }
   return { mode: 'session' }
