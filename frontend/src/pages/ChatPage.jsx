@@ -25,10 +25,6 @@ function ChatThread({ sessionId }) {
   const [sendError,    setSendError]    = useState(null)
   const [synthesisPendingUntil, setSynthesisPendingUntil] = useState(null)
 
-  // BD-360: per-message voice selection; Maisie is default
-  const [selectedVoice, setSelectedVoice] = useState('maisie')
-  const [squadMode,     setSquadMode]     = useState(false)
-
   const bottomRef = useRef(null)
   const inputRef  = useRef(null)
 
@@ -46,18 +42,6 @@ function ChatThread({ sessionId }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length, sending])
 
-  // ── voice selector helpers ──────────────────────────────────────────────────
-
-  function selectVoice(voiceId) {
-    setSelectedVoice(voiceId)
-    setSquadMode(false)
-  }
-
-  function selectSquad() {
-    setSquadMode(true)
-    setSelectedVoice(null)
-  }
-
   // ── send ────────────────────────────────────────────────────────────────────
 
   async function handleSend() {
@@ -68,34 +52,14 @@ function ChatThread({ sessionId }) {
     setText('')
 
     try {
-      if (squadMode) {
-        // BD-360: squad mode — fire one request per member sequentially;
-        // only prepend the user message bubble on the first response to avoid
-        // showing 6 copies of the same user message in the thread.
-        let isFirst = true
-        for (const v of VOICES) {
-          setSendingVoice(v.id)
-          const res = await api.post(`/chat/sessions/${sessionId}/messages`, { content, voice: v.id })
-          const { user_message, assistant_message } = res.data.data
-          const capturedIsFirst = isFirst
-          isFirst = false
-          qc.setQueryData(['chat-session', sessionId], old => {
-            if (!old) return old
-            const additions = capturedIsFirst
-              ? [user_message, assistant_message]
-              : [assistant_message]
-            return { ...old, messages: [...(old.messages ?? []), ...additions] }
-          })
-        }
-      } else {
-        setSendingVoice(selectedVoice)
-        const res = await api.post(`/chat/sessions/${sessionId}/messages`, { content, voice: selectedVoice })
-        const { user_message, assistant_message } = res.data.data
-        qc.setQueryData(['chat-session', sessionId], old => old ? {
-          ...old,
-          messages: [...(old.messages ?? []), user_message, assistant_message],
-        } : old)
-      }
+      // Route to session's current voice (session-level routing — BD-361)
+      setSendingVoice(session?.voice ?? 'maisie')
+      const res = await api.post(`/chat/sessions/${sessionId}/messages`, { content })
+      const { user_message, assistant_message } = res.data.data
+      qc.setQueryData(['chat-session', sessionId], old => old ? {
+        ...old,
+        messages: [...(old.messages ?? []), user_message, assistant_message],
+      } : old)
       qc.invalidateQueries({ queryKey: ['chat-sessions'] })
     } catch (err) {
       const message =
@@ -124,9 +88,9 @@ function ChatThread({ sessionId }) {
 
   // ── derived display values ──────────────────────────────────────────────────
 
-  const activeVoice    = VOICES.find(v => v.id === selectedVoice) ?? VOICES[0]
+  const activeVoice     = VOICES.find(v => v.id === session?.voice) ?? VOICES[0]
   const sendingVoiceObj = VOICES.find(v => v.id === sendingVoice)
-  const inputPlaceholder = squadMode ? 'Ask the squad…' : `Ask ${activeVoice.label} anything…`
+  const inputPlaceholder = `Ask ${activeVoice.label} anything…`
 
   // ── render ──────────────────────────────────────────────────────────────────
 
@@ -160,14 +124,9 @@ function ChatThread({ sessionId }) {
         {messages.length === 0 && !sending && (
           <div style={{ textAlign: 'center', paddingTop: '48px' }}>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
-              {squadMode
-                ? <>You are speaking with <strong style={{ color: 'var(--color-navy)' }}>the Squad</strong></>
-                : <>You are speaking with <strong style={{ color: 'var(--color-navy)' }}>{activeVoice.label}</strong></>
-              }
+              You are speaking with <strong style={{ color: 'var(--color-navy)' }}>{activeVoice.label}</strong>
             </p>
-            {!squadMode && (
-              <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{activeVoice.desc}</p>
-            )}
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{activeVoice.desc}</p>
           </div>
         )}
 
@@ -223,30 +182,6 @@ function ChatThread({ sessionId }) {
 
       {/* Input area */}
       <div className="chat-input-area">
-
-        {/* BD-360: voice selector — individual members + Squad */}
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '10px' }}>
-          {VOICES.map(v => (
-            <button
-              key={v.id}
-              className={`voice-pill${!squadMode && selectedVoice === v.id ? ' active' : ''}`}
-              onClick={() => selectVoice(v.id)}
-              title={v.desc}
-              disabled={sending}
-            >
-              {v.label}
-            </button>
-          ))}
-          <button
-            className={`voice-pill${squadMode ? ' active' : ''}`}
-            onClick={selectSquad}
-            title="Ask all squad members"
-            disabled={sending}
-            style={squadMode ? { borderColor: 'var(--color-gold)', color: 'var(--color-gold)' } : {}}
-          >
-            Squad
-          </button>
-        </div>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
           <textarea
