@@ -14,6 +14,19 @@ const VOICES = [
   { id: 'jackson', label: 'Jackson', desc: 'Narrative & investigative' },
 ]
 
+const SQUAD_KEYWORDS = ['squad', 'everyone', 'all of you', 'the team', 'the whole team', 'get everyone']
+
+// BD-361: infer routing from natural language — no syntax required.
+// Returns { mode: 'squad' } | { mode: 'voice', voiceId } | { mode: 'session' }
+function detectRouting(content) {
+  const lower = content.toLowerCase()
+  if (SQUAD_KEYWORDS.some(k => lower.includes(k))) return { mode: 'squad' }
+  for (const v of VOICES) {
+    if (lower.includes(v.label.toLowerCase())) return { mode: 'voice', voiceId: v.id }
+  }
+  return { mode: 'session' }
+}
+
 // ─── Chat thread (main area when a session is open) ──────────────────────────
 
 function ChatThread({ sessionId }) {
@@ -52,14 +65,36 @@ function ChatThread({ sessionId }) {
     setText('')
 
     try {
-      // Route to session's current voice (session-level routing — BD-361)
-      setSendingVoice(session?.voice ?? 'maisie')
-      const res = await api.post(`/chat/sessions/${sessionId}/messages`, { content })
-      const { user_message, assistant_message } = res.data.data
-      qc.setQueryData(['chat-session', sessionId], old => old ? {
-        ...old,
-        messages: [...(old.messages ?? []), user_message, assistant_message],
-      } : old)
+      const routing = detectRouting(content)
+
+      if (routing.mode === 'squad') {
+        // Fire all six sequentially; only the first response contributes the user bubble
+        let isFirst = true
+        for (const v of VOICES) {
+          setSendingVoice(v.id)
+          const res = await api.post(`/chat/sessions/${sessionId}/messages`, { content, voice: v.id })
+          const { user_message, assistant_message } = res.data.data
+          const capturedIsFirst = isFirst
+          isFirst = false
+          qc.setQueryData(['chat-session', sessionId], old => {
+            if (!old) return old
+            const additions = capturedIsFirst ? [user_message, assistant_message] : [assistant_message]
+            return { ...old, messages: [...(old.messages ?? []), ...additions] }
+          })
+        }
+      } else {
+        // Named member or session default
+        const voice = routing.mode === 'voice' ? routing.voiceId : (session?.voice ?? 'maisie')
+        setSendingVoice(voice)
+        const body = routing.mode === 'voice' ? { content, voice } : { content }
+        const res = await api.post(`/chat/sessions/${sessionId}/messages`, body)
+        const { user_message, assistant_message } = res.data.data
+        qc.setQueryData(['chat-session', sessionId], old => old ? {
+          ...old,
+          messages: [...(old.messages ?? []), user_message, assistant_message],
+        } : old)
+      }
+
       qc.invalidateQueries({ queryKey: ['chat-sessions'] })
     } catch (err) {
       const message =
