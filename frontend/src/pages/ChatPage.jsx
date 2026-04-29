@@ -10,7 +10,7 @@ const VOICES = [
   { id: 'pippa',   label: 'Pippa',   desc: 'CI & BD'                  },
   { id: 'cate',    label: 'Cate',    desc: 'Legal & financial'         },
   { id: 'lance',   label: 'Lance',   desc: 'Tactical'                  },
-  { id: 'jack',    label: 'Jack',    desc: 'SOF cultural'              },
+  { id: 'cole',    label: 'Cole',    desc: 'SOF cultural'              },
   { id: 'jackson', label: 'Jackson', desc: 'Narrative & investigative' },
 ]
 

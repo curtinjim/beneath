@@ -18,7 +18,7 @@ class AnthropicProvider implements BeneathAIProvider
         'pippa'                       => 'skill_01TbUbu8MWxRBNmvAH6CvTzR',
         'cate'                        => 'skill_01AcaSbRQhuaYnvuiEopmMpV',
         'lance'                       => 'skill_01VJLwsLmmwEu9B9aqB8fcmZ',
-        'jack'                        => 'skill_01ANszmacPDDFmCrEocp8Rnk',
+        'cole'                        => 'skill_01ANszmacPDDFmCrEocp8Rnk',
         'jackson'                     => 'skill_016WVYgWcCyHUkUX9wT88Ytj',
         'email-significance'          => 'skill_01Xmz4PhWcjKYUbzjLvo2JMF',
         'divergence-computation'      => 'skill_016ULhPd5up15Gqx86EAk2s8',

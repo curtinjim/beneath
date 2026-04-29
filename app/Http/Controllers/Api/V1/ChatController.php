@@ -29,7 +29,7 @@ class ChatController extends Controller
     {
         $validated = $request->validate([
             'title'      => 'nullable|string|max:255',
-            'voice'      => 'nullable|in:maisie,pippa,cate,lance,jack,jackson',
+            'voice'      => 'nullable|in:maisie,pippa,cate,lance,cole,jackson',
             'project_id' => 'nullable|string|exists:projects,id',
         ]);
 
@@ -88,7 +88,7 @@ class ChatController extends Controller
 
         $validated = $request->validate([
             'content' => 'required|string|max:20000',
-            'voice'   => 'nullable|in:maisie,pippa,cate,lance,jack,jackson',
+            'voice'   => 'nullable|in:maisie,pippa,cate,lance,cole,jackson',
         ]);
 
         // BD-360: per-message voice — use request voice or fall back to session default
