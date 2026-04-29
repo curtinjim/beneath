@@ -88,14 +88,18 @@ class ChatController extends Controller
 
         $validated = $request->validate([
             'content' => 'required|string|max:20000',
+            'voice'   => 'nullable|in:maisie,pippa,cate,lance,jack,jackson',
         ]);
+
+        // BD-360: per-message voice — use request voice or fall back to session default
+        $activeVoice = $validated['voice'] ?? $session->voice;
 
         // Resolve skill ID from tenant config (BD-125)
         $config  = TenantAiConfig::forTenant(Auth::user()->tenant_id);
-        $skillId = $config->getSkillId($session->voice);
+        $skillId = $config->getSkillId($activeVoice);
 
         if (!$skillId) {
-            return response()->json(['error' => 'Unknown voice: ' . $session->voice], 422);
+            return response()->json(['error' => 'Unknown voice: ' . $activeVoice], 422);
         }
 
         // BD-124: inject project context on the first message of a project-linked session
@@ -120,7 +124,7 @@ class ChatController extends Controller
             'tenant_id'  => $session->tenant_id,
             'role'       => 'user',
             'content'    => $validated['content'],
-            'voice'      => $session->voice,
+            'voice'      => $activeVoice,
             'created_at' => now(),
         ]);
 
@@ -149,7 +153,7 @@ class ChatController extends Controller
             'tenant_id'  => $session->tenant_id,
             'role'       => 'assistant',
             'content'    => $responseText,
-            'voice'      => $session->voice,
+            'voice'      => $activeVoice,
             'created_at' => now(),
         ]);
 
