@@ -44,7 +44,7 @@ function ChatThread({ sessionId, onVoiceChange }) {
     mutationFn: (voiceId) => api.patch(`/chat/sessions/${sessionId}`, { voice: voiceId }),
     onMutate: async (voiceId) => {
       // Optimistic update — swap voice immediately in cached session
-      await qc.cancelQueries(['chat-session', sessionId])
+      await qc.cancelQueries({ queryKey: ['chat-session', sessionId] })
       const prev = qc.getQueryData(['chat-session', sessionId])
       qc.setQueryData(['chat-session', sessionId], old => old ? { ...old, voice: voiceId } : old)
       return { prev }
@@ -53,8 +53,8 @@ function ChatThread({ sessionId, onVoiceChange }) {
       if (ctx?.prev) qc.setQueryData(['chat-session', sessionId], ctx.prev)
     },
     onSuccess: () => {
-      qc.invalidateQueries(['chat-session', sessionId])
-      qc.invalidateQueries(['chat-sessions'])
+      qc.invalidateQueries({ queryKey: ['chat-session', sessionId] })
+      qc.invalidateQueries({ queryKey: ['chat-sessions'] })
       onVoiceChange?.()
     },
   })
@@ -72,7 +72,7 @@ function ChatThread({ sessionId, onVoiceChange }) {
         ...old,
         messages: [...(old.messages ?? []), user_message, assistant_message],
       } : old)
-      qc.invalidateQueries(['chat-sessions'])
+      qc.invalidateQueries({ queryKey: ['chat-sessions'] })
     } catch (err) {
       const message =
         err.response?.data?.message ??

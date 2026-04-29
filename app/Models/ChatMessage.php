@@ -9,7 +9,7 @@ class ChatMessage extends Model {
     protected $keyType = 'string';
     public $incrementing = false;
     public $timestamps = false;
-    protected $fillable = ['session_id', 'role', 'content', 'voice'];
+    protected $fillable = ['session_id', 'tenant_id', 'role', 'content', 'voice'];
     protected $casts = ['created_at' => 'datetime'];
 
     protected static function boot(): void {

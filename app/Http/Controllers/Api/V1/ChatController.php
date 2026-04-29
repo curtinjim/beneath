@@ -117,6 +117,7 @@ class ChatController extends Controller
         // Save user message (store raw content, not context-prefixed version)
         $userMsg = ChatMessage::create([
             'session_id' => $session->id,
+            'tenant_id'  => $session->tenant_id,
             'role'       => 'user',
             'content'    => $validated['content'],
             'voice'      => $session->voice,
@@ -145,6 +146,7 @@ class ChatController extends Controller
         // Save assistant message
         $assistantMsg = ChatMessage::create([
             'session_id' => $session->id,
+            'tenant_id'  => $session->tenant_id,
             'role'       => 'assistant',
             'content'    => $responseText,
             'voice'      => $session->voice,
