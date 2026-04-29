@@ -123,9 +123,8 @@ function ChatThread({ sessionId }) {
 
   // ── derived display values ──────────────────────────────────────────────────
 
-  const activeVoice     = VOICES.find(v => v.id === session?.voice) ?? VOICES[0]
-  const sendingVoiceObj = VOICES.find(v => v.id === sendingVoice)
-  const inputPlaceholder = `Ask ${activeVoice.label} anything…`
+  const sendingVoiceObj  = VOICES.find(v => v.id === sendingVoice)
+  const inputPlaceholder = 'Ask the squad anything…'
 
   // ── render ──────────────────────────────────────────────────────────────────
 
@@ -159,9 +158,9 @@ function ChatThread({ sessionId }) {
         {messages.length === 0 && !sending && (
           <div style={{ textAlign: 'center', paddingTop: '48px' }}>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
-              You are speaking with <strong style={{ color: 'var(--color-navy)' }}>{activeVoice.label}</strong>
+              Address any squad member by name, or ask the <strong style={{ color: 'var(--color-navy)' }}>squad</strong> to weigh in together.
             </p>
-            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{activeVoice.desc}</p>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Maisie leads by default.</p>
           </div>
         )}
 
